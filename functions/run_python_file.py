@@ -1,7 +1,6 @@
 import os
 import subprocess
 
-
 def run_python_file(working_directory, file_path, args=None):
     absolute_working_dir = os.path.abspath(working_directory)
     absolute_file_path = os.path.abspath(os.path.join(working_directory, file_path))
@@ -19,7 +18,7 @@ def run_python_file(working_directory, file_path, args=None):
     if args is not None:
         command.extend(args)
 
-    # ← put the try/except HERE
+
     try:
         result = subprocess.run(
             command,

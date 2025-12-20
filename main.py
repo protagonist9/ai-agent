@@ -21,47 +21,57 @@ def main():
     args = parser.parse_args()
     messages = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)])]
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents = messages,
-        config=types.GenerateContentConfig(tools=[available_functions],system_instruction=system_prompt)
-    )
-    if not response.usage_metadata:
-        raise RuntimeError("Gemini API response appears to be malformed")
-
-    if args.verbose:
-        print("User prompt:", args.user_prompt)
-        print("Prompt tokens:", response.usage_metadata.prompt_token_count)
-        print("Response tokens:", response.usage_metadata.candidates_token_count)
-
-    print("Response:")
-
-    if response.function_calls is not None:
-        tool_parts = []
-
-        for function_call_part in response.function_calls:
-            # Actually call the function
-            function_call_result = call_function(
-                function_call_part,
-                verbose=args.verbose,
+    for iteration in range(20):
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=messages,
+                config=types.GenerateContentConfig(tools=[available_functions], system_instruction=system_prompt)
             )
-
-            # Make sure we got a function_response back
-            if (
-                not function_call_result.parts
-                or not function_call_result.parts[0].function_response
-                or function_call_result.parts[0].function_response.response is None
-            ):
-                raise RuntimeError("Function call returned no response")
-
-            part = function_call_result.parts[0]
-            tool_parts.append(part)
+            
+            for candidate in response.candidates:
+                messages.append(candidate.content)
+                
+            if not response.usage_metadata:
+                raise RuntimeError("Gemini API response appears to be malformed")
 
             if args.verbose:
-                print(f"-> {part.function_response.response}")
-    else:
-        print(response.text)
+                print("User prompt:", args.user_prompt)
+                print("Prompt tokens:", response.usage_metadata.prompt_token_count)
+                print("Response tokens:", response.usage_metadata.candidates_token_count)
 
+            if response.function_calls is not None:
+                tool_parts = []
+
+                for function_call_part in response.function_calls:
+                    function_call_result = call_function(
+                        function_call_part,
+                        verbose=args.verbose,
+                    )
+
+                    if (
+                        not function_call_result.parts
+                        or not function_call_result.parts[0].function_response
+                        or function_call_result.parts[0].function_response.response is None
+                    ):
+                        raise RuntimeError("Function call returned no response")
+
+                    part = function_call_result.parts[0]
+                    tool_parts.append(part)
+
+                    if args.verbose:
+                        print(f"-> {part.function_response.response}")
+                
+                tool_message = types.Content(role="user", parts=tool_parts)
+                messages.append(tool_message)
+            else:
+                if response.text:
+                    print("Final response:")
+                    print(response.text)
+                    break
+        except Exception as e:
+            print(f"Error: {e}")
+            break
 
 if __name__ == "__main__":
     main()

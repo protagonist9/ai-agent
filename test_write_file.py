@@ -1,13 +1,13 @@
-from functions import write_file_content
+from functions import write_file
 
 def test():
-    result = write_file_content.write_file("calculator", "lorem.txt", "wait, this isn't lorem ipsum")
+    result = write_file.write_file("calculator", "lorem.txt", "wait, this isn't lorem ipsum")
     print(result)
 
-    result = write_file_content.write_file("calculator", "pkg/morelorem.txt", "lorem ipsum dolor sit amet")
+    result = write_file.write_file("calculator", "pkg/morelorem.txt", "lorem ipsum dolor sit amet")
     print(result)
 
-    result = write_file_content.write_file("calculator", "/tmp/temp.txt", "this should not be allowed")
+    result = write_file.write_file("calculator", "/tmp/temp.txt", "this should not be allowed")
     print(result)
 
 

@@ -22,7 +22,7 @@ def get_file_content(working_directory, file_path):
         return f"Error: {e}"
 schema_get_file_content = types.FunctionDeclaration(
 name="get_file_content",
-description=f"Reads and returns the first {MAX_CHARS} characters of the content from a specified file within the working directory.",
+description=f"Gets the text content of a file. Call this function when asked to 'read', 'show', 'display', 'get', or 'view' the contents of a file. Returns up to {MAX_CHARS} characters.",
 parameters=types.Schema(
     type=types.Type.OBJECT,
     properties={

@@ -1,14 +1,12 @@
 import os
 import argparse
 from prompts import system_prompt
-from functions.get_files_info import schema_get_files_info
+from call_function import available_functions  # <-- This line
 
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-available_functions = types.Tool(
-    function_declarations=[schema_get_files_info],
-)
+
 def main():
     load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
